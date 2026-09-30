@@ -1,0 +1,165 @@
+@font-face {
+  font-family: 'Roobert';
+  src: url('/fonts/RoobertVF.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal Mono';
+  src: url('/fonts/PPNeueMontrealMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Montreal Mono';
+  src: url('/fonts/PPNeueMontrealMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --bg: #ffffff;
+  --border: #e3e3e3;
+  --text: #0d0d0d;
+  --text-faint: #6b6b6b;
+  --accent: #8a05ff;
+  --accent-display: #8a05ff;
+  --btn-bg: #0d0d0d;
+  --btn-text: #ffffff;
+  --font-brand: 'Roobert', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-default: 'PP Neue Montreal', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'PP Neue Montreal Mono', 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ease: cubic-bezier(0.9, 0.1, 0.1, 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0d;
+    --border: #272727;
+    --text: #ffffff;
+    --text-faint: #b3b3b3;
+    --accent-display: #c29eff;
+    --btn-bg: #ffffff;
+    --btn-text: #0d0d0d;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-default);
+  -webkit-font-smoothing: antialiased;
+}
+
+.overline {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.landing {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 32px;
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo { height: 24px; }
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .logo-light { display: none; }
+  .logo-dark { display: block; }
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 48px;
+  padding: 96px 0;
+}
+
+h1 {
+  font-family: var(--font-brand);
+  font-weight: 300;
+  font-size: 128px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0;
+  max-width: 14ch;
+}
+
+.location { color: var(--accent-display); }
+
+.make {
+  position: relative;
+  overflow: hidden;
+  align-self: flex-start;
+  border: 0;
+  border-radius: 0;
+  padding: 32px 96px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-family: var(--font-brand);
+  font-weight: 300;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+
+.make-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 350ms var(--ease);
+}
+
+.make-label { position: relative; }
+
+.make:hover:not(:disabled) { color: #ffffff; }
+.make:hover:not(:disabled) .make-fill { transform: scaleX(1); transform-origin: left; }
+.make:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.make:disabled { cursor: progress; background: var(--accent); color: #ffffff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .make-fill { transition: none; }
+}
+
+@media (max-width: 1023px) {
+  h1 { font-size: 80px; }
+  .make { font-size: 56px; padding: 24px 64px; }
+}
+
+@media (max-width: 767px) {
+  .landing { padding: 0 16px; }
+  .hero { gap: 32px; padding: 56px 0; }
+  h1 { font-size: 56px; }
+  .make { align-self: stretch; font-size: 40px; padding: 24px; }
+}

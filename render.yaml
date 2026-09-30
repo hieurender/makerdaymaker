@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: makerdaymaker
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/config
+    envVars:
+      - key: MAKER_DAY_LOCATION
+        value: San Francisco
