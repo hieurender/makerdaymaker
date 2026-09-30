@@ -2,14 +2,19 @@
   "name": "makerdaymaker",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "concurrently -k -n server,client \"node --watch server/index.js\" \"vite\"",
+    "dev": "concurrently -k -n server,client \"node --env-file-if-exists=.env --watch server/index.js\" \"vite\"",
     "build": "vite build",
-    "start": "node server/index.js",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "workflow": "node workflow/index.js",
     "dump:slack": "node scripts/dump-slack-directory.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
+    "@renderinc/sdk": "^1.2.0",
     "express": "^5.1.0"
   },
   "devDependencies": {

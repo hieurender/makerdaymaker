@@ -69,8 +69,14 @@ async function execute(run) {
   }
   const show = (view, data) => emit(run, { type: 'interim', view, data });
   const send = (event) => emit(run, event);
-  const data = await step.run(log, run.results, show, send, run.config);
-  run.results[step.key] = data;
-  run.busy = false;
-  emit(run, { type: 'result', key: step.key, data });
+  try {
+    const data = await step.run(log, run.results, show, send, run.config);
+    run.results[step.key] = data;
+    run.busy = false;
+    emit(run, { type: 'result', key: step.key, data });
+  } catch (error) {
+    run.busy = false;
+    log(`Step failed: ${error?.message ?? error}`);
+    emit(run, { type: 'error', key: step.key, message: String(error?.message ?? error) });
+  }
 }

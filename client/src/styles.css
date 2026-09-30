@@ -949,3 +949,21 @@ h2 {
   h1 { font-size: 56px; }
   .make { align-self: stretch; font-size: 40px; padding: 24px; }
 }
+
+.team-pitch {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-body, inherit);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+}
+
+.team-pitch strong { font-weight: 500; color: var(--accent-display); }
+
+.team-pitch span { color: var(--text-faint); }
+
+.team-overlay .team-pitch { text-align: center; }
