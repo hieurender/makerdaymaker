@@ -4,18 +4,25 @@ import Spinner from './Spinner.jsx';
 
 const VISIBLE_LOGS = 12;
 
-const initial = { step: null, logs: [], results: {}, interim: null, statuses: {}, startedAt: null };
+const noVotes = { cast: 0, last: null };
+
+const initial = { step: null, logs: [], results: {}, interim: null, statuses: {}, voting: noVotes, startedAt: null };
 
 function reduce(state, event) {
   switch (event.type) {
     case 'step': {
       const { [event.key]: _, ...results } = state.results;
-      return { ...state, step: event, logs: [], results, interim: null, statuses: {}, startedAt: event.at };
+      return { ...state, step: event, logs: [], results, interim: null, statuses: {}, voting: noVotes, startedAt: event.at };
     }
     case 'interim':
       return { ...state, logs: [], interim: event };
     case 'team-status':
       return { ...state, statuses: { ...state.statuses, [event.slug]: event.status } };
+    case 'vote':
+      return {
+        ...state,
+        voting: { cast: event.n, last: event },
+      };
     case 'log':
       return { ...state, logs: [...state.logs, event], interim: null };
     case 'result':
@@ -61,7 +68,7 @@ export default function RunView({ runId }) {
     setPending(false);
   }
 
-  const { step, logs, results, interim, statuses, startedAt } = state;
+  const { step, logs, results, interim, statuses, voting, startedAt } = state;
   if (!step) return null;
   const result = results[step.key];
   const pinnedTheme = step.key !== 'theme' && results.theme;
@@ -102,7 +109,7 @@ export default function RunView({ runId }) {
       )}
 
       <div className="stage">
-        {result ? <Reveal view={step.key} data={result} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} /> : (
+        {result ? <Reveal view={step.key} data={result} voting={voting} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} voting={voting} /> : (
           <div className="working">
             <Spinner />
             <ul className="log">
@@ -131,11 +138,12 @@ function awardLabel(award, i) {
   return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
 }
 
-function Reveal({ view, data, statuses }) {
+function Reveal({ view, data, statuses, voting }) {
   if (view === 'theme') return <ThemeReveal theme={data} />;
   if (view === 'awards') return <AwardsReveal awards={data} />;
   if (view === 'headcount') return <HeadcountReveal roster={data} />;
   if (view === 'teams') return <TeamsReveal teams={data.teams} />;
+  if (view === 'voting') return <VotingBoard total={data.total} awards={data.awards} voting={voting} />;
   if (view === 'projects') return <TeamsReveal teams={data.teams} statuses={statuses ?? {}} allReady={!statuses} />;
   return null;
 }
@@ -170,6 +178,41 @@ function TeamsReveal({ teams, statuses, allReady }) {
         );
       })}
     </ol>
+  );
+}
+
+function VotingBoard({ total, awards, voting }) {
+  const remaining = total - voting.cast;
+  const { last } = voting;
+  return (
+    <div className="voting">
+      <div className="voting-head">
+        <div className="countdown">
+          <span className="overline">{remaining === 0 ? 'Polls closed' : 'Votes remaining'}</span>
+          <span className="countdown-number">{remaining.toLocaleString()}</span>
+        </div>
+        <div className="voter" aria-live="off">
+          {last && (
+            <div key={last.n} className="voter-flash">
+              <span className="overline">Ballot cast</span>
+              <span className="voter-name">{last.voter.name}</span>
+              <span className="voter-org">{last.voter.org ?? '\u00a0'}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      <ol className="ballot-awards">
+        {awards.map((name, i) => {
+          const team = last?.picks[i];
+          return (
+            <li key={name} className="ballot-award">
+              <span className="overline">{name}</span>
+              <span key={last?.n} className={team ? 'ballot-team flash' : 'ballot-team'}>{team ?? 'Awaiting votes'}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 

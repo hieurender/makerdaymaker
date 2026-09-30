@@ -4,13 +4,14 @@ import { generateAwards } from './steps/awards.js';
 import { buildProjects } from './steps/projects.js';
 import { formTeams } from './steps/teams.js';
 import { generateTheme } from './steps/theme.js';
+import { runVoting } from './steps/voting.js';
 
 export const STEPS = [
   { key: 'theme', name: 'Generating a theme', run: generateTheme },
   { key: 'awards', name: 'Generating awards', run: generateAwards },
   { key: 'teams', name: 'Forming teams', run: formTeams },
   { key: 'projects', name: 'Building projects', run: buildProjects },
-  { key: 'voting', name: 'Voting' },
+  { key: 'voting', name: 'Voting', run: runVoting },
   { key: 'winners', name: 'Announcing winners' },
 ];
 

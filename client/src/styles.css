@@ -34,6 +34,7 @@
   --accent-strong: #48008c;
   --success: #009e7a;
   --bg-hover: rgba(0, 0, 0, 0.02);
+  --flash: #e7dbff;
   --btn-bg: #0d0d0d;
   --btn-text: #ffffff;
   --font-brand: 'Roobert', 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -53,6 +54,7 @@
     --accent-strong: #c29eff;
     --success: #00db7c;
     --bg-hover: rgba(255, 255, 255, 0.03);
+    --flash: #48008c;
     --btn-bg: #ffffff;
     --btn-text: #0d0d0d;
   }
@@ -160,6 +162,7 @@ h1 {
   .make-fill { transition: none; }
   .log li, .reveal, .award, .headcount, .team { animation: none; }
   .team-overlay { transition: none; }
+  .voter-flash, .ballot-team.flash { animation: none; }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none; }
@@ -442,6 +445,100 @@ h1 {
   white-space: nowrap;
 }
 
+.voting {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.voting-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: end;
+}
+
+.countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.countdown-number {
+  font-family: var(--font-mono);
+  font-size: 160px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.voter { min-height: 120px; }
+
+.voter-flash {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: voter 250ms var(--ease) both;
+}
+
+.voter-name {
+  font-family: var(--font-brand);
+  font-weight: 300;
+  font-size: 56px;
+  line-height: 60px;
+  letter-spacing: -0.02em;
+}
+
+.voter-org {
+  font-size: 18px;
+  line-height: 26px;
+  color: var(--text-faint);
+}
+
+.ballot-awards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.ballot-award {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.ballot-team {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 36px;
+  letter-spacing: -0.012em;
+  margin: 0 -8px;
+  padding: 4px 8px;
+}
+
+.ballot-team:not(.flash) { color: var(--text-faint); }
+
+.ballot-team.flash { animation: flash 600ms ease-out both; }
+
+@keyframes flash {
+  from { background: var(--flash); }
+  to { background: transparent; }
+}
+
+@keyframes voter {
+  from { opacity: 0.2; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -607,6 +704,8 @@ h2 {
   .awards { grid-template-columns: repeat(2, 1fr); }
   .pinned-awards { grid-template-columns: repeat(3, 1fr); }
   .teams { grid-template-columns: repeat(2, 1fr); }
+  .ballot-awards { grid-template-columns: repeat(2, 1fr); }
+  .countdown-number { font-size: 112px; }
   .make { font-size: 56px; padding: 24px 64px; }
 }
 
@@ -623,6 +722,11 @@ h2 {
   .pinned-awards { grid-template-columns: repeat(2, 1fr); }
   .headcount { grid-template-columns: 1fr; gap: 32px; }
   .teams { grid-template-columns: 1fr; }
+  .voting-head { grid-template-columns: 1fr; gap: 24px; }
+  .countdown-number { font-size: 72px; }
+  .voter-name { font-size: 32px; line-height: 36px; }
+  .ballot-awards { grid-template-columns: 1fr; }
+  .ballot-team { font-size: 24px; line-height: 28px; }
   .headcount-number { font-size: 64px; }
   .headcount table { font-size: 14px; line-height: 20px; }
   .actions { flex-direction: column-reverse; }
