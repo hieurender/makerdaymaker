@@ -1,27 +1,31 @@
-services:
-  - type: web
-    name: makerdaymaker
-    runtime: node
-    plan: starter
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm start
-    healthCheckPath: /api/config
-    envVars:
-      - key: MAKER_DAY_LOCATION
-        value: San Francisco
-      - key: WORKFLOW_SLUG
-        fromService:
-          type: workflow
-          name: makerdaymaker-workflow
-          property: slug
-      - key: RENDER_API_KEY
-        sync: false
+projects:
+  - name: makerdaymaker
+    environments:
+      - name: production
+        services:
+          - type: web
+            name: makerdaymaker
+            runtime: node
+            plan: starter
+            buildCommand: npm ci --include=dev && npm run build
+            startCommand: npm start
+            healthCheckPath: /api/config
+            envVars:
+              - key: MAKER_DAY_LOCATION
+                value: San Francisco
+              - key: WORKFLOW_SLUG
+                fromService:
+                  type: workflow
+                  name: makerdaymaker-workflow
+                  property: slug
+              - key: RENDER_API_KEY
+                sync: false
 
-  - type: workflow
-    name: makerdaymaker-workflow
-    runtime: node
-    region: oregon
-    buildCommand: npm ci --omit=dev
-    startCommand: node workflow/index.js
-    envVars:
-      - fromGroup: rendervous-inference-keys
+          - type: workflow
+            name: makerdaymaker-workflow
+            runtime: node
+            region: oregon
+            buildCommand: npm ci --omit=dev
+            startCommand: node workflow/index.js
+            envVars:
+              - fromGroup: rendervous-inference-keys
