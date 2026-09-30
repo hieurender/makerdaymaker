@@ -1,16 +1,16 @@
 import { THEMES } from '../data/themes.js';
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { between, sleep } from './util.js';
 
 const LINES = [
   'Connecting to theme service',
-  `Sampling ${THEMES.length} candidate themes`,
+  'Reading past Maker Day retros',
+  'Brainstorming theme concepts',
   'Ranking candidates by vibes',
   'Checking for trademark conflicts',
 ];
 
 export async function generateTheme(log) {
-  const total = 3000 + Math.random() * 2000;
+  const total = between(3000, 5000);
   for (const line of LINES) {
     log(line);
     await sleep(total / LINES.length);

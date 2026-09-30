@@ -1,10 +1,11 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
+import { generateAwards } from './steps/awards.js';
 import { generateTheme } from './steps/theme.js';
 
 export const STEPS = [
   { key: 'theme', name: 'Generating a theme', run: generateTheme },
-  { key: 'awards', name: 'Generating awards' },
+  { key: 'awards', name: 'Generating awards', run: generateAwards },
   { key: 'teams', name: 'Forming teams' },
   { key: 'projects', name: 'Building projects' },
   { key: 'voting', name: 'Voting' },

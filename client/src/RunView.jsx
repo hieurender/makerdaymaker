@@ -55,6 +55,7 @@ export default function RunView({ runId }) {
   if (!step) return null;
   const result = results[step.key];
   const pinnedTheme = step.key !== 'theme' && results.theme;
+  const pinnedAwards = !['theme', 'awards'].includes(step.key) && results.awards;
 
   return (
     <section className="run">
@@ -77,11 +78,21 @@ export default function RunView({ runId }) {
             <p className="theme-name">{pinnedTheme.name}</p>
             <p className="theme-tagline">{pinnedTheme.tagline}</p>
           </div>
+          {pinnedAwards && (
+            <ol className="pinned-awards">
+              {pinnedAwards.map((award, i) => (
+                <li key={award.name} style={{ viewTransitionName: `award-${i}` }}>
+                  <span className="overline">{awardLabel(award, i)}</span>
+                  <span>{award.name}</span>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
       )}
 
       <div className="stage">
-        {step.key === 'theme' && result ? <ThemeReveal theme={result} /> : (
+        {result ? <Reveal stepKey={step.key} data={result} /> : (
           <div className="working">
             <Spinner />
             <ul className="log">
@@ -103,6 +114,30 @@ export default function RunView({ runId }) {
         </div>
       )}
     </section>
+  );
+}
+
+function awardLabel(award, i) {
+  return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
+}
+
+function Reveal({ stepKey, data }) {
+  if (stepKey === 'theme') return <ThemeReveal theme={data} />;
+  if (stepKey === 'awards') return <AwardsReveal awards={data} />;
+  return null;
+}
+
+function AwardsReveal({ awards }) {
+  return (
+    <ol className="awards">
+      {awards.map((award, i) => (
+        <li key={award.name} className="award" style={{ animationDelay: `${i * 120}ms`, viewTransitionName: `award-${i}` }}>
+          <span className="overline">{awardLabel(award, i)}</span>
+          <h3>{award.name}</h3>
+          <p>{award.description}</p>
+        </li>
+      ))}
+    </ol>
   );
 }
 

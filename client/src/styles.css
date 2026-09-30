@@ -156,7 +156,7 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
-  .log li, .reveal { animation: none; }
+  .log li, .reveal, .award { animation: none; }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none; }
@@ -170,8 +170,30 @@ h1 {
 }
 
 .pinned {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 24px 0;
   border-bottom: 1px solid var(--border);
+}
+
+.pinned-awards {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--border);
+}
+
+.pinned-awards li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.01em;
 }
 
 .pinned .theme-block { gap: 4px; }
@@ -193,7 +215,13 @@ h1 {
   margin: 0;
 }
 
-::view-transition-group(theme) {
+::view-transition-group(theme),
+::view-transition-group(award-0),
+::view-transition-group(award-1),
+::view-transition-group(award-2),
+::view-transition-group(award-3),
+::view-transition-group(award-4),
+::view-transition-group(award-5) {
   animation-duration: 700ms;
   animation-timing-function: var(--ease);
 }
@@ -201,6 +229,44 @@ h1 {
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 350ms;
+}
+
+.awards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.award {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  animation: enter 500ms var(--ease) both;
+}
+
+.award h3 {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.award p {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .actions {
@@ -357,6 +423,8 @@ h2 {
 
 @media (max-width: 1023px) {
   h1 { font-size: 80px; }
+  .awards { grid-template-columns: repeat(2, 1fr); }
+  .pinned-awards { grid-template-columns: repeat(3, 1fr); }
   .make { font-size: 56px; padding: 24px 64px; }
 }
 
@@ -369,6 +437,8 @@ h2 {
   .log { font-size: 14px; line-height: 20px; }
   .tagline { font-size: 20px; line-height: 28px; }
   .pinned .theme-name { font-size: 24px; line-height: 28px; }
+  .awards { grid-template-columns: 1fr; }
+  .pinned-awards { grid-template-columns: repeat(2, 1fr); }
   .actions { flex-direction: column-reverse; }
   .btn { width: 100%; min-height: 44px; }
   .hero { gap: 32px; padding: 56px 0; }
