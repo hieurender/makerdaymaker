@@ -1,7 +1,14 @@
 import { between, shuffle, sleep } from './util.js';
 
 const FINAL_STRETCH = 10;
-const LAST_VOTER = 'Anurag Goel';
+const LAST_VOTER_MIN_YEARS = 3;
+
+function isVeteran(employee) {
+  if (!employee.startDate) return false;
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - LAST_VOTER_MIN_YEARS);
+  return new Date(employee.startDate) <= cutoff;
+}
 
 function voteDelay(progress, remaining) {
   if (remaining < FINAL_STRETCH) return between(300, 500);
@@ -22,10 +29,8 @@ function weightedPick(items, weight) {
 export async function runVoting(log, { awards, projects }, show, send) {
   const teams = projects.teams;
   const shuffled = shuffle(teams.flatMap((team) => team.members.map((voter) => ({ voter, team: team.name }))));
-  const ballots = [
-    ...shuffled.filter((b) => b.voter.name !== LAST_VOTER),
-    ...shuffled.filter((b) => b.voter.name === LAST_VOTER),
-  ];
+  const last = shuffled.find((b) => isVeteran(b.voter));
+  const ballots = [...shuffled.filter((b) => b !== last), ...(last ? [last] : [])];
   const appeal = awards.map(() => Object.fromEntries(teams.map((t) => [t.name, 0.1 + Math.random() ** 3])));
   const tallies = awards.map(() => ({}));
   log(`Distributing ballots to ${ballots.length} employees`);
