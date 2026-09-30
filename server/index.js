@@ -56,6 +56,7 @@ app.use(express.static(distDir));
 app.get('/:slug', (req, res, next) => {
   const page = getPage(req.params.slug);
   if (!page) return next();
+  res.set('Content-Security-Policy', "sandbox allow-scripts; default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:");
   res.type('html').send(page);
 });
 app.get('/{*splat}', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));

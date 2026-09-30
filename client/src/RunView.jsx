@@ -13,6 +13,8 @@ const initial = {
   results: {},
   interim: null,
   statuses: {},
+  pitches: {},
+  error: null,
   voting: noVotes,
   finished: false,
   startedAt: null,
@@ -22,12 +24,16 @@ function reduce(state, event) {
   switch (event.type) {
     case 'step': {
       const { [event.key]: _, ...results } = state.results;
-      return { ...state, step: event, logs: [], results, interim: null, statuses: {}, voting: noVotes, startedAt: event.at };
+      return { ...state, error: null, step: event, logs: [], results, interim: null, statuses: {}, pitches: {}, voting: noVotes, startedAt: event.at };
     }
     case 'interim':
       return { ...state, logs: [], interim: event };
     case 'team-status':
-      return { ...state, statuses: { ...state.statuses, [event.slug]: event.status } };
+      return {
+        ...state,
+        statuses: { ...state.statuses, [event.slug]: event.status },
+        pitches: event.pitch ? { ...state.pitches, [event.slug]: event.pitch } : state.pitches,
+      };
     case 'finished':
       return { ...state, finished: event.next };
     case 'vote':
@@ -36,7 +42,10 @@ function reduce(state, event) {
         voting: { cast: event.n, last: event },
       };
     case 'log':
-      return { ...state, logs: [...state.logs, event], interim: null };
+      const keepGrid = state.interim?.view === 'projects';
+      return { ...state, logs: [...state.logs, event], interim: keepGrid ? state.interim : null };
+    case 'error':
+      return { ...state, error: event.message };
     case 'result':
       return { ...state, results: { ...state.results, [event.key]: event.data } };
     default:
@@ -82,7 +91,7 @@ export default function RunView({ runId }) {
     setPending(false);
   }
 
-  const { step, logs, results, interim, statuses, voting, finished, startedAt } = state;
+  const { step, logs, results, interim, statuses, pitches, voting, finished, startedAt, error } = state;
   if (!step) return null;
   const result = results[step.key];
   const pinnedTheme = step.key !== 'theme' && results.theme;
@@ -112,9 +121,9 @@ export default function RunView({ runId }) {
       )}
 
       <div className="stage">
-        {finished ? <Finale reveals={result.reveals} next={finished} /> : result ? <Reveal view={step.key} data={result} voting={voting} onFinalSlide={onFinalSlide} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} voting={voting} /> : (
+        {finished ? <Finale reveals={result.reveals} next={finished} /> : result ? <Reveal view={step.key} data={result} voting={voting} onFinalSlide={onFinalSlide} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} pitches={pitches} voting={voting} /> : (
           <div className="working">
-            <Spinner />
+            {error ? <p role="alert">Step failed: {error}</p> : <Spinner />}
             <ul className="log">
               {logs.slice(-VISIBLE_LOGS).map((l) => (
                 <li key={l.id}>
@@ -133,10 +142,10 @@ export default function RunView({ runId }) {
         </div>
       )}
 
-      {result && step.index < step.total - 1 && (
+      {(error || (result && step.index < step.total - 1)) && (
         <div className="actions">
           <button className="btn btn-secondary" onClick={() => act('retry')} disabled={pending}>Retry</button>
-          <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Approve</button>
+          {result && <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Approve</button>}
         </div>
       )}
     </section>
@@ -147,26 +156,28 @@ function awardLabel(award, i) {
   return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
 }
 
-function Reveal({ view, data, statuses, voting, onFinalSlide }) {
+function Reveal({ view, data, statuses, pitches, voting, onFinalSlide }) {
   if (view === 'theme') return <ThemeReveal theme={data} />;
   if (view === 'awards') return <AwardsReveal awards={data} />;
   if (view === 'headcount') return <HeadcountReveal roster={data} />;
   if (view === 'teams') return <TeamsReveal teams={data.teams} />;
   if (view === 'winners') return <WinnersShow reveals={data.reveals} onFinalSlide={onFinalSlide} />;
   if (view === 'voting') return <VotingBoard total={data.total} awards={data.awards} voting={voting} />;
-  if (view === 'projects') return <TeamsReveal teams={data.teams} statuses={statuses ?? {}} allReady={!statuses} />;
+  if (view === 'projects') return <TeamsReveal teams={data.teams} statuses={statuses ?? {}} pitches={pitches ?? {}} allReady={!statuses} />;
   return null;
 }
 
-function TeamsReveal({ teams, statuses, allReady }) {
+function TeamsReveal({ teams, statuses, pitches = {}, allReady }) {
   const tracking = Boolean(statuses);
   return (
     <ol className="teams">
       {teams.map((team, i) => {
         const status = allReady ? 'ready' : statuses?.[team.slug];
+        const pitch = pitches[team.slug];
         const body = (
           <>
             <h3 className="team-name">{team.name}</h3>
+            {pitch && status === 'ready' && <Pitch pitch={pitch} />}
             <ul>
               {team.members.map((m) => (
                 <li key={m.id} className={m.fake ? undefined : 'existing'}>
@@ -183,11 +194,20 @@ function TeamsReveal({ teams, statuses, allReady }) {
             {status === 'ready' ? (
               <a className="team-link" href={`/${team.slug}`} target="_blank" rel="noopener noreferrer">{body}</a>
             ) : body}
-            {tracking && <TeamStatus status={status} />}
+            {tracking && <TeamStatus status={status} pitch={pitch} />}
           </li>
         );
       })}
     </ol>
+  );
+}
+
+function Pitch({ pitch }) {
+  return (
+    <div className="team-pitch">
+      <strong>{pitch.product}</strong>
+      <span>{pitch.tagline}</span>
+    </div>
   );
 }
 
@@ -226,12 +246,13 @@ function VotingBoard({ total, awards, voting }) {
   );
 }
 
-function TeamStatus({ status }) {
+function TeamStatus({ status, pitch }) {
   const done = status === 'ready';
   return (
     <div className={done ? 'team-overlay done' : 'team-overlay'} aria-hidden={done}>
       {!done && <Spinner />}
       <span>{done ? status : status ?? 'waiting'}</span>
+      {!done && pitch && <Pitch pitch={pitch} />}
     </div>
   );
 }

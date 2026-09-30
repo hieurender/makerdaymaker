@@ -1,23 +1,6 @@
-import { between, shuffle, sleep } from './util.js';
-
-const MINGLING = [
-  'bickering',
-  'gelling',
-  'lunching',
-  'procrastinating',
-  'bikeshedding',
-  'whiteboarding',
-  'naming things',
-  'arguing about tabs vs spaces',
-  'rubber-ducking',
-  'scoping down',
-  'scoping back up',
-  'reading the docs',
-  'rewriting it in Rust',
-  'snacking',
-  'pair programming',
-  'googling the error',
-];
+import { shuffle } from './util.js';
+import { runProjects } from '../workflowClient.js';
+import { DEMOS, DOMAINS, LOOKS } from '../../workflow/styles.js';
 
 const FEATURES = [
   ['One-click everything', 'Press the button. Things happen. You go home early.'],
@@ -103,36 +86,52 @@ function renderPage(team, theme, year) {
 </html>`;
 }
 
-async function buildOne(team, theme, year, setStatus) {
-  setStatus('meeting & greeting');
-  await sleep(2000);
+const HEARTBEAT_MS = 15000;
+const publicPitch = ({ product, tagline }) => ({ product, tagline });
+const MAX_TEAMS = Number(process.env.MAX_TEAMS) || Infinity;
 
-  let last;
-  const changes = Math.floor(between(3, 9));
-  for (let i = 0; i < changes; i++) {
-    const options = MINGLING.filter((s) => s !== last);
-    last = options[Math.floor(Math.random() * options.length)];
-    setStatus(last);
-    await sleep(between(2000, 2600));
-  }
+export async function buildProjects(log, { theme, awards, teams: roster }, show, send, { year }) {
+  const teams = roster.teams.slice(0, MAX_TEAMS).map((t) => ({ ...t, slug: slugify(t.name) }));
+  const started = Date.now();
+  const current = new Map();
+  const status = (slug, value, pitch) => {
+    current.set(slug, value);
+    const pitched = pitch ? ` - "${pitch.product}"` : '';
+    console.log(`[workflow] +${Math.round((Date.now() - started) / 1000)}s ${slug}: ${value}${pitched}`);
+    send({ type: 'team-status', slug, status: value, pitch: pitch ? publicPitch(pitch) : undefined });
+  };
+  const heartbeat = setInterval(() => {
+    const counts = {};
+    for (const value of current.values()) counts[value] = (counts[value] ?? 0) + 1;
+    console.log(`[workflow] +${Math.round((Date.now() - started) / 1000)}s progress: ${JSON.stringify(counts)}`);
+  }, HEARTBEAT_MS);
+  const looks = shuffle(LOOKS);
+  const demos = shuffle(DEMOS);
+  const domains = shuffle(DOMAINS);
+  const brief = teams.map((t, i) => ({
+    name: t.name,
+    slug: t.slug,
+    style: { look: looks[i % looks.length], demo: demos[i % demos.length], domain: domains[i % domains.length] },
+  }));
 
-  setStatus('building');
-  await sleep(between(2000, 4000));
-  pages.set(team.slug, renderPage(team, theme, year));
-
-  if (Math.random() < 0.2) {
-    setStatus('last-minute changes');
-    await sleep(between(2000, 3000));
-  }
-
-  setStatus('ready');
-}
-
-export async function buildProjects(_log, { theme, teams: roster }, show, send, { year }) {
-  const teams = roster.teams.map((t) => ({ ...t, slug: slugify(t.name) }));
   show('projects', { teams });
-  await Promise.all(
-    teams.map((team) => buildOne(team, theme, year, (status) => send({ type: 'team-status', slug: team.slug, status }))),
-  );
+  teams.forEach((t) => status(t.slug, 'queued'));
+  console.log(`[workflow] starting ${teams.length} teams`);
+  const results = await runProjects({ theme, awards, teams: brief, onStatus: status, log }).finally(() => clearInterval(heartbeat));
+
+  const bySlug = new Map(results.map((r) => [r.slug, r]));
+  for (const team of teams) {
+    const result = bySlug.get(team.slug);
+    if (result?.html) {
+      pages.set(team.slug, result.html);
+      console.log(`[workflow] ${team.slug}: review ${result.review}${result.problems?.length ? ` - ${result.problems.join('; ')}` : ''}`);
+    } else {
+      console.error(`[workflow] ${team.slug}: FAILED - ${result?.error ?? 'no result'}`);
+      log(`${team.name}: build failed (${result?.error ?? 'no result'}); shipping a template page`);
+      pages.set(team.slug, renderPage(team, theme, year));
+    }
+    status(team.slug, 'ready', result?.pitch);
+  }
+  console.log(`[workflow] finished: ${teams.length} teams, ${results.filter((r) => r.html).length} built by AI`);
   return { teams };
 }
