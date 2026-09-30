@@ -125,6 +125,41 @@ h1 {
 
 .location { color: var(--accent-display); }
 
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  animation: backdrop-in 1200ms var(--ease) both;
+}
+
+.backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.photo-credit {
+  position: fixed;
+  right: 16px;
+  bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.025em;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+.photo-credit:hover { color: var(--text); text-decoration: underline; }
+
 .make {
   position: relative;
   overflow: hidden;
@@ -160,7 +195,7 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
-  .log li, .reveal, .award, .headcount, .team { animation: none; }
+  .log li, .reveal, .award, .headcount, .team, .backdrop { animation: none; }
   .team-overlay { transition: none; }
   .stepbar-segments li.current { animation: none; }
   .voter-flash, .ballot-team.flash, .winners > *, .suspense { animation: none; }

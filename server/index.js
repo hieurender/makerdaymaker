@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { backgroundFor } from './background.js';
 import { DEFAULT_CONFIG, parseConfig } from './config.js';
 import { approve, createRun, getRun, retry } from './runs.js';
 import { getPage } from './steps/projects.js';
@@ -13,6 +14,13 @@ app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
   res.json(DEFAULT_CONFIG);
+});
+
+app.get('/api/background', async (req, res) => {
+  const { location } = parseConfig({ location: req.query.location });
+  const background = await backgroundFor(location);
+  if (!background) return res.status(404).json({ error: 'no image' });
+  res.set('Cache-Control', 'public, max-age=86400').json(background);
 });
 
 app.post('/api/make', (req, res) => {
