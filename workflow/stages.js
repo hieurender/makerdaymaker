@@ -50,8 +50,8 @@ export async function pitchTeam({ team, theme, awards }) {
       'Reply with a single JSON object and nothing else.',
     prompt:
       `Theme: "${theme.name}" - ${theme.tagline}\n` +
-      `Team: "${team.name}"\n` +
-      `Assigned domain: ${team.style.domain}\n` +
+      `Team name: "${team.name}"\n` +
+      `Suggested domain (a hint only): ${team.style.domain}\n` +
       `Assigned demo format: ${team.style.demo}\n` +
       `Assigned visual style: ${team.style.look.name}\n\n` +
       `The team is competing for these awards:\n${awards.map(awardLine).join('\n')}\n\n` +
@@ -59,7 +59,8 @@ export async function pitchTeam({ team, theme, awards }) {
       '{"product": "catchy product name", "tagline": "one witty sentence", ' +
       '"palette": {"bg": "#hex", "fg": "#hex", "accent": "#hex"}, ' +
       '"features": [{"title": "...", "body": "one sentence"}, ...3 items]}\n' +
-      'The product must be about the assigned domain, seen through the theme, and must not be a generic idea that other teams would also pick. It must fit the assigned demo format and visual style, and the palette must suit the visual style. Make bg/fg high contrast.',
+      'The team name is the main inspiration: the product must be a pun, a literal reading or a clever riff on the name, so that anyone seeing the name next to the product gets the joke. ' +
+      'Use the suggested domain only as flavor when it fits the name; if it conflicts with the name, the name wins. Also see the theme, and avoid generic ideas other teams would pick. It must fit the assigned demo format and visual style, and the palette must suit the visual style. Make bg/fg high contrast.',
   });
   return validatePitch(parseJson(text));
 }
@@ -75,7 +76,7 @@ export async function buildPage({ team, theme, pitch }) {
     prompt:
       `Build the web app for this Maker Day team.\n\n` +
       `Theme: "${theme.name}" - ${theme.tagline}\n` +
-      `Team: "${team.name}"\n` +
+      `Team name: "${team.name}" - the product is a riff on this name, so show the name prominently and make the copy and UI play on it.\n` +
       `Assigned visual style: ${team.style.look.name} - ${team.style.look.brief}\n` +
       `Assigned demo format: ${team.style.demo}\n` +
       `Product: ${pitch.product} - ${pitch.tagline}\n` +

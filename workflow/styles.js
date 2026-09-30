@@ -45,11 +45,14 @@ export const DEMOS = [
 ];
 
 export const DOMAINS = [
-  'pets and animals', 'cooking and recipes', 'weather', 'sports and fitness', 'music and bands', 'travel and maps',
-  'gardening and plants', 'personal finance', 'space and astronomy', 'fashion and wardrobes', 'coffee and tea', 'board games',
-  'movies and TV', 'sleep and dreams', 'commuting and traffic', 'home repair', 'parenting and kids', 'dating and friendship',
-  'books and libraries', 'cars and driving', 'birthdays and parties', 'the ocean', 'dinosaurs and history', 'office life and meetings',
-  'email and inboxes', 'fitness trackers and steps', 'plants vs. houseplants', 'trains and airports', 'art and museums', 'superstitions and luck',
-  'mythology and monsters', 'mountains and camping', 'cleaning and chores', 'trivia and quizzes', 'language and slang', 'robots and gadgets',
-  'farmers markets', 'weddings', 'spooky stories', 'retirement and hobbies',
+  'deploys and rollbacks', 'on-call and incidents', 'databases and Postgres', 'cron jobs and schedules',
+  'logs and debugging', 'autoscaling and traffic spikes', 'preview environments', 'private networking',
+  'cold starts and latency', 'build pipelines and CI', 'customer support tickets', 'pricing and invoices',
+  'uptime and status pages', 'environment variables and secrets', 'infrastructure as code and Blueprints', 'git branches and pull requests',
+  'code review', 'docs and onboarding', 'sales demos and customer calls', 'hiring and interviews',
+  'all-hands and meetings', 'Slack and team chat', 'background workers and queues', 'AI agents and workflows',
+  'pets and animals', 'cooking and recipes', 'weather', 'sports and fitness',
+  'music and bands', 'travel and maps', 'gardening and plants', 'space and astronomy',
+  'coffee and tea', 'board games', 'movies and TV', 'sleep and dreams',
+  'weddings', 'spooky stories', 'mountains and camping', 'trivia and quizzes',
 ];
