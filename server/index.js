@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LOCATION, YEAR } from './config.js';
+import { DEFAULT_CONFIG, parseConfig } from './config.js';
 import { approve, createRun, getRun, retry } from './runs.js';
 import { getPage } from './steps/projects.js';
 
@@ -12,11 +12,11 @@ const app = express();
 app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
-  res.json({ year: YEAR, location: LOCATION });
+  res.json(DEFAULT_CONFIG);
 });
 
-app.post('/api/make', (_req, res) => {
-  const run = createRun();
+app.post('/api/make', (req, res) => {
+  const run = createRun(parseConfig(req.body));
   res.status(202).json({ id: run.id });
 });
 

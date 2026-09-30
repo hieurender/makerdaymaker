@@ -1,4 +1,3 @@
-import { YEAR } from '../config.js';
 import { between, shuffle, sleep } from './util.js';
 
 const MINGLING = [
@@ -61,7 +60,7 @@ export function slugify(name) {
 
 const escape = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-function renderPage(team, theme) {
+function renderPage(team, theme, year) {
   const p = PALETTES[Math.floor(Math.random() * PALETTES.length)];
   const features = shuffle(FEATURES).slice(0, 3);
   return `<!doctype html>
@@ -89,7 +88,7 @@ function renderPage(team, theme) {
 </head>
 <body>
 <main>
-  <nav>${escape(team.name)} <span>Maker Day ${YEAR}</span></nav>
+  <nav>${escape(team.name)} <span>Maker Day ${year}</span></nav>
   <section class="hero">
     <h1>${escape(team.name)}</h1>
     <p class="lede">${escape(theme.tagline)}</p>
@@ -104,7 +103,7 @@ function renderPage(team, theme) {
 </html>`;
 }
 
-async function buildOne(team, theme, setStatus) {
+async function buildOne(team, theme, year, setStatus) {
   setStatus('meeting & greeting');
   await sleep(2000);
 
@@ -114,26 +113,26 @@ async function buildOne(team, theme, setStatus) {
     const options = MINGLING.filter((s) => s !== last);
     last = options[Math.floor(Math.random() * options.length)];
     setStatus(last);
-    await sleep(between(400, 600));
+    await sleep(between(2000, 2600));
   }
 
   setStatus('building');
   await sleep(between(2000, 4000));
-  pages.set(team.slug, renderPage(team, theme));
+  pages.set(team.slug, renderPage(team, theme, year));
 
   if (Math.random() < 0.2) {
     setStatus('last-minute changes');
-    await sleep(between(1000, 2500));
+    await sleep(between(2000, 3000));
   }
 
   setStatus('ready');
 }
 
-export async function buildProjects(_log, { theme, teams: roster }, show, send) {
+export async function buildProjects(_log, { theme, teams: roster }, show, send, { year }) {
   const teams = roster.teams.map((t) => ({ ...t, slug: slugify(t.name) }));
   show('projects', { teams });
   await Promise.all(
-    teams.map((team) => buildOne(team, theme, (status) => send({ type: 'team-status', slug: team.slug, status }))),
+    teams.map((team) => buildOne(team, theme, year, (status) => send({ type: 'team-status', slug: team.slug, status }))),
   );
   return { teams };
 }

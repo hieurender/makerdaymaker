@@ -7,11 +7,24 @@ export default function App() {
   const [runId, setRunId] = useState(null);
 
   useEffect(() => {
-    fetch('/api/config').then((r) => r.json()).then(setConfig);
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((defaults) => {
+        const params = new URLSearchParams(window.location.search);
+        setConfig({
+          year: Number(params.get('year')) || defaults.year,
+          location: params.get('location') || defaults.location,
+          headcount: Number(params.get('headcount')) || defaults.headcount,
+        });
+      });
   }, []);
 
   async function make() {
-    const res = await fetch('/api/make', { method: 'POST' });
+    const res = await fetch('/api/make', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
     const run = await res.json();
     setRunId(run.id);
   }

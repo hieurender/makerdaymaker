@@ -1,12 +1,22 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import Spinner from './Spinner.jsx';
+import WinnersShow, { Finale } from './WinnersShow.jsx';
 
 const VISIBLE_LOGS = 12;
 
 const noVotes = { cast: 0, last: null };
 
-const initial = { step: null, logs: [], results: {}, interim: null, statuses: {}, voting: noVotes, startedAt: null };
+const initial = {
+  step: null,
+  logs: [],
+  results: {},
+  interim: null,
+  statuses: {},
+  voting: noVotes,
+  finished: false,
+  startedAt: null,
+};
 
 function reduce(state, event) {
   switch (event.type) {
@@ -18,6 +28,8 @@ function reduce(state, event) {
       return { ...state, logs: [], interim: event };
     case 'team-status':
       return { ...state, statuses: { ...state.statuses, [event.slug]: event.status } };
+    case 'finished':
+      return { ...state, finished: event.next };
     case 'vote':
       return {
         ...state,
@@ -41,6 +53,8 @@ export default function RunView({ runId }) {
   const [pending, setPending] = useState(false);
   const indexRef = useRef(-1);
   const heldRef = useRef(null);
+  const [finalSlide, setFinalSlide] = useState(false);
+  const onFinalSlide = useCallback((value) => setFinalSlide(value), []);
 
   useEffect(() => {
     const source = new EventSource(`/api/runs/${runId}/events`);
@@ -68,11 +82,10 @@ export default function RunView({ runId }) {
     setPending(false);
   }
 
-  const { step, logs, results, interim, statuses, voting, startedAt } = state;
+  const { step, logs, results, interim, statuses, voting, finished, startedAt } = state;
   if (!step) return null;
   const result = results[step.key];
   const pinnedTheme = step.key !== 'theme' && results.theme;
-  const pinnedAwards = !['theme', 'awards'].includes(step.key) && results.awards;
 
   return (
     <section className="run">
@@ -83,7 +96,7 @@ export default function RunView({ runId }) {
         </div>
         <ol className="stepbar-segments" aria-hidden="true">
           {Array.from({ length: step.total }, (_, i) => (
-            <li key={i} className={i < step.index ? 'done' : i === step.index ? 'current' : ''} />
+            <li key={i} className={i < step.index || finished ? 'done' : i === step.index ? 'current' : ''} />
           ))}
         </ol>
       </div>
@@ -95,21 +108,11 @@ export default function RunView({ runId }) {
             <p className="theme-name">{pinnedTheme.name}</p>
             <p className="theme-tagline">{pinnedTheme.tagline}</p>
           </div>
-          {pinnedAwards && (
-            <ol className="pinned-awards">
-              {pinnedAwards.map((award, i) => (
-                <li key={award.name} style={{ viewTransitionName: `award-${i}` }}>
-                  <span className="overline">{awardLabel(award, i)}</span>
-                  <span>{award.name}</span>
-                </li>
-              ))}
-            </ol>
-          )}
         </div>
       )}
 
       <div className="stage">
-        {result ? <Reveal view={step.key} data={result} voting={voting} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} voting={voting} /> : (
+        {finished ? <Finale reveals={result.reveals} next={finished} /> : result ? <Reveal view={step.key} data={result} voting={voting} onFinalSlide={onFinalSlide} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} voting={voting} /> : (
           <div className="working">
             <Spinner />
             <ul className="log">
@@ -124,7 +127,13 @@ export default function RunView({ runId }) {
         )}
       </div>
 
-      {result && (
+      {result && step.index === step.total - 1 && finalSlide && !finished && (
+        <div className="actions">
+          <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Wrap up Maker Day</button>
+        </div>
+      )}
+
+      {result && step.index < step.total - 1 && (
         <div className="actions">
           <button className="btn btn-secondary" onClick={() => act('retry')} disabled={pending}>Retry</button>
           <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Approve</button>
@@ -138,11 +147,12 @@ function awardLabel(award, i) {
   return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
 }
 
-function Reveal({ view, data, statuses, voting }) {
+function Reveal({ view, data, statuses, voting, onFinalSlide }) {
   if (view === 'theme') return <ThemeReveal theme={data} />;
   if (view === 'awards') return <AwardsReveal awards={data} />;
   if (view === 'headcount') return <HeadcountReveal roster={data} />;
   if (view === 'teams') return <TeamsReveal teams={data.teams} />;
+  if (view === 'winners') return <WinnersShow reveals={data.reveals} onFinalSlide={onFinalSlide} />;
   if (view === 'voting') return <VotingBoard total={data.total} awards={data.awards} voting={voting} />;
   if (view === 'projects') return <TeamsReveal teams={data.teams} statuses={statuses ?? {}} allReady={!statuses} />;
   return null;
@@ -230,7 +240,7 @@ function AwardsReveal({ awards }) {
   return (
     <ol className="awards">
       {awards.map((award, i) => (
-        <li key={award.name} className="award" style={{ animationDelay: `${i * 120}ms`, viewTransitionName: `award-${i}` }}>
+        <li key={award.name} className="award" style={{ animationDelay: `${i * 120}ms` }}>
           <span className="overline">{awardLabel(award, i)}</span>
           <h3>{award.name}</h3>
           <p>{award.description}</p>

@@ -1,14 +1,9 @@
-import { between, shuffle, sleep } from './util.js';
+import { between, hasTenure, shuffle, sleep } from './util.js';
 
 const FINAL_STRETCH = 10;
 const LAST_VOTER_MIN_YEARS = 3;
-
-function isVeteran(employee) {
-  if (!employee.startDate) return false;
-  const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - LAST_VOTER_MIN_YEARS);
-  return new Date(employee.startDate) <= cutoff;
-}
+const MOMENTUM = 0.05;
+const WINNER_SHARE = [70 / 220, 100 / 220];
 
 function voteDelay(progress, remaining) {
   if (remaining < FINAL_STRETCH) return between(300, 500);
@@ -26,13 +21,26 @@ function weightedPick(items, weight) {
   return items[items.length - 1];
 }
 
-export async function runVoting(log, { awards, projects }, show, send) {
+export async function runVoting(log, { awards, teams: roster, projects }, show, send) {
   const teams = projects.teams;
-  const shuffled = shuffle(teams.flatMap((team) => team.members.map((voter) => ({ voter, team: team.name }))));
-  const last = shuffled.find((b) => isVeteran(b.voter));
+  const teamOf = new Map(teams.flatMap((team) => team.members.map((m) => [m.id, team.name])));
+  const shuffled = shuffle(roster.employees.map((voter) => ({ voter, team: teamOf.get(voter.id) })));
+  const last = shuffled.find((b) => hasTenure(b.voter, LAST_VOTER_MIN_YEARS));
   const ballots = [...shuffled.filter((b) => b !== last), ...(last ? [last] : [])];
   const appeal = awards.map(() => Object.fromEntries(teams.map((t) => [t.name, 0.1 + Math.random() ** 3])));
   const tallies = awards.map(() => ({}));
+  const targets = awards.map(() => ballots.length * between(...WINNER_SHARE));
+
+  const vote = (award, eligible, remaining) => {
+    const votes = tallies[award];
+    const count = (t) => votes[t.name] ?? 0;
+    const weight = (t) => appeal[award][t.name] + MOMENTUM * count(t);
+    const leader = eligible.reduce((a, b) => (count(b) > count(a) ? b : a));
+    if (count(leader) === 0) return weightedPick(eligible, weight);
+    const leaderChance = Math.min(1, Math.max(0, (targets[award] - count(leader)) / remaining));
+    if (Math.random() < leaderChance) return leader;
+    return weightedPick(eligible.filter((t) => t !== leader), weight);
+  };
   log(`Distributing ballots to ${ballots.length} employees`);
   await sleep(between(1000, 1500));
   log('Verifying voter eligibility');
@@ -48,7 +56,7 @@ export async function runVoting(log, { awards, projects }, show, send) {
     await sleep(voteDelay(i / ballots.length, ballots.length - i));
     const eligible = teams.filter((t) => t.name !== ballot.team);
     const picks = awards.map((_, award) => {
-      const pick = weightedPick(eligible, (t) => appeal[award][t.name]).name;
+      const pick = vote(award, eligible, ballots.length - i).name;
       tallies[award][pick] = (tallies[award][pick] ?? 0) + 1;
       return pick;
     });
