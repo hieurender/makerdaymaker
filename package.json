@@ -15,7 +15,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
     "@renderinc/sdk": "^1.2.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jose": "^6.2.12"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",

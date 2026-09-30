@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { requireOkta } from './auth.js';
 import { backgroundFor } from './background.js';
 import { DEFAULT_CONFIG, parseConfig } from './config.js';
 import { approve, createRun, getRun, retry } from './runs.js';
@@ -10,6 +11,7 @@ const port = process.env.PORT || 3000;
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
 
 const app = express();
+app.use(requireOkta);
 app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
