@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRun, getRun } from './runs.js';
+import { approve, createRun, getRun, retry } from './runs.js';
 
 const port = process.env.PORT || 3000;
 const location = process.env.MAKER_DAY_LOCATION || 'San Francisco';
@@ -18,6 +18,15 @@ app.post('/api/make', (_req, res) => {
   const run = createRun();
   res.status(202).json({ id: run.id });
 });
+
+for (const [action, fn] of [['retry', retry], ['approve', approve]]) {
+  app.post(`/api/runs/:id/${action}`, (req, res) => {
+    const run = getRun(req.params.id);
+    if (!run) return res.status(404).json({ error: 'not found' });
+    if (!fn(run)) return res.status(409).json({ error: `cannot ${action} now` });
+    res.status(202).end();
+  });
+}
 
 app.get('/api/runs/:id/events', (req, res) => {
   const run = getRun(req.params.id);

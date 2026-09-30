@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { generateTheme } from './steps/theme.js';
 
 export const STEPS = [
-  { key: 'theme', name: 'Generating a theme' },
+  { key: 'theme', name: 'Generating a theme', run: generateTheme },
   { key: 'awards', name: 'Generating awards' },
   { key: 'teams', name: 'Forming teams' },
   { key: 'projects', name: 'Building projects' },
@@ -18,10 +18,24 @@ export function getRun(id) {
 }
 
 export function createRun() {
-  const run = { id: randomUUID(), events: [], emitter: new EventEmitter(), results: {} };
+  const run = { id: randomUUID(), index: 0, busy: false, events: [], emitter: new EventEmitter(), results: {} };
   runs.set(run.id, run);
   execute(run);
   return run;
+}
+
+export function retry(run) {
+  if (run.busy) return false;
+  execute(run);
+  return true;
+}
+
+export function approve(run) {
+  if (run.busy || !(STEPS[run.index].key in run.results)) return false;
+  if (run.index === STEPS.length - 1) return false;
+  run.index += 1;
+  execute(run);
+  return true;
 }
 
 function emit(run, event) {
@@ -31,11 +45,19 @@ function emit(run, event) {
 }
 
 async function execute(run) {
-  const index = 0;
+  const index = run.index;
   const step = STEPS[index];
+  run.busy = true;
+  delete run.results[step.key];
   emit(run, { type: 'step', index, total: STEPS.length, key: step.key, name: step.name });
   const log = (message) => emit(run, { type: 'log', message });
-  const theme = await generateTheme(log);
-  run.results.theme = theme;
-  emit(run, { type: 'result', key: step.key, data: theme });
+  if (!step.run) {
+    log('Not built yet');
+    run.busy = false;
+    return;
+  }
+  const data = await step.run(log, run.results);
+  run.results[step.key] = data;
+  run.busy = false;
+  emit(run, { type: 'result', key: step.key, data });
 }

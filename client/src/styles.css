@@ -31,6 +31,8 @@
   --text-faint: #6b6b6b;
   --accent: #8a05ff;
   --accent-display: #8a05ff;
+  --accent-strong: #48008c;
+  --success: #009e7a;
   --btn-bg: #0d0d0d;
   --btn-text: #ffffff;
   --font-brand: 'Roobert', 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -47,6 +49,8 @@
     --text-secondary: #c7c7c7;
     --text-faint: #b3b3b3;
     --accent-display: #c29eff;
+    --accent-strong: #c29eff;
+    --success: #00db7c;
     --btn-bg: #ffffff;
     --btn-text: #0d0d0d;
   }
@@ -153,7 +157,94 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
   .log li, .reveal { animation: none; }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none; }
 }
+
+.theme-block {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  view-transition-name: theme;
+}
+
+.pinned {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pinned .theme-block { gap: 4px; }
+
+.pinned .theme-name {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 36px;
+  letter-spacing: -0.012em;
+  margin: 4px 0 0;
+}
+
+.pinned .theme-tagline {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+::view-transition-group(theme) {
+  animation-duration: 700ms;
+  animation-timing-function: var(--ease);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 350ms;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px 0 32px;
+}
+
+.btn {
+  border-radius: 0;
+  padding: 12px 24px;
+  font-family: var(--font-default);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 26px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  border: 1px solid var(--btn-bg);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+.btn-primary:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  border: 1px solid var(--text);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+}
+
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:disabled { cursor: progress; opacity: 0.5; }
 
 .run {
   flex: 1;
@@ -194,7 +285,7 @@ h2 {
 }
 
 .stepbar-segments li { height: 4px; background: var(--border); }
-.stepbar-segments li.done { background: var(--text); }
+.stepbar-segments li.done { background: var(--success); }
 .stepbar-segments li.current { background: var(--accent); }
 
 .stage {
@@ -277,6 +368,9 @@ h2 {
   .spinner { font-size: 40px; }
   .log { font-size: 14px; line-height: 20px; }
   .tagline { font-size: 20px; line-height: 28px; }
+  .pinned .theme-name { font-size: 24px; line-height: 28px; }
+  .actions { flex-direction: column-reverse; }
+  .btn { width: 100%; min-height: 44px; }
   .hero { gap: 32px; padding: 56px 0; }
   h1 { font-size: 56px; }
   .make { align-self: stretch; font-size: 40px; padding: 24px; }
