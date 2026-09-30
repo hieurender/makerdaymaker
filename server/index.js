@@ -1,17 +1,17 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { LOCATION, YEAR } from './config.js';
 import { approve, createRun, getRun, retry } from './runs.js';
 
 const port = process.env.PORT || 3000;
-const location = process.env.MAKER_DAY_LOCATION || 'San Francisco';
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
 
 const app = express();
 app.use(express.json());
 
 app.get('/api/config', (_req, res) => {
-  res.json({ year: 2027, location });
+  res.json({ year: YEAR, location: LOCATION });
 });
 
 app.post('/api/make', (_req, res) => {

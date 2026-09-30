@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "concurrently -k -n server,client \"node --watch server/index.js\" \"vite\"",
     "build": "vite build",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "dump:slack": "node scripts/dump-slack-directory.js"
   },
   "dependencies": {
     "express": "^5.1.0"

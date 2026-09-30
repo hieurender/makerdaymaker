@@ -156,7 +156,7 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
-  .log li, .reveal, .award { animation: none; }
+  .log li, .reveal, .award, .headcount, .team { animation: none; }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none; }
@@ -269,6 +269,118 @@ h1 {
   margin: 0;
 }
 
+.headcount {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 64px;
+  align-items: start;
+  animation: enter 600ms var(--ease) both;
+}
+
+.headcount-total {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.headcount-number {
+  font-family: var(--font-brand);
+  font-weight: 300;
+  font-size: 128px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.headcount table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.headcount th {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-align: left;
+  padding: 0 16px 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.headcount td {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.headcount th:not(:first-child),
+.headcount td:not(:first-child) {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.headcount td:nth-child(3) { color: var(--success); }
+
+.stage:has(.teams) { align-items: flex-start; }
+
+.teams {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  animation: enter 400ms var(--ease) both;
+}
+
+.team ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.team ul li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.team-name {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.team ul li.existing span:first-child { color: var(--accent-display); }
+
+.team-org {
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -339,6 +451,14 @@ h2 {
   line-height: 44px;
   letter-spacing: -0.015em;
   margin: 0;
+}
+
+.step-count {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 44px;
+  color: var(--text-faint);
 }
 
 .stepbar-segments {
@@ -425,13 +545,14 @@ h2 {
   h1 { font-size: 80px; }
   .awards { grid-template-columns: repeat(2, 1fr); }
   .pinned-awards { grid-template-columns: repeat(3, 1fr); }
+  .teams { grid-template-columns: repeat(2, 1fr); }
   .make { font-size: 56px; padding: 24px 64px; }
 }
 
 @media (max-width: 767px) {
   .shell { padding: 0 16px; }
   .stepbar-label { flex-direction: column; gap: 8px; }
-  h2 { font-size: 24px; line-height: 28px; }
+  h2, .step-count { font-size: 24px; line-height: 28px; }
   .working { gap: 16px; }
   .spinner { font-size: 40px; }
   .log { font-size: 14px; line-height: 20px; }
@@ -439,6 +560,10 @@ h2 {
   .pinned .theme-name { font-size: 24px; line-height: 28px; }
   .awards { grid-template-columns: 1fr; }
   .pinned-awards { grid-template-columns: repeat(2, 1fr); }
+  .headcount { grid-template-columns: 1fr; gap: 32px; }
+  .teams { grid-template-columns: 1fr; }
+  .headcount-number { font-size: 64px; }
+  .headcount table { font-size: 14px; line-height: 20px; }
   .actions { flex-direction: column-reverse; }
   .btn { width: 100%; min-height: 44px; }
   .hero { gap: 32px; padding: 56px 0; }
