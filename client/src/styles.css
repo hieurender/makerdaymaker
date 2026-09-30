@@ -33,6 +33,7 @@
   --accent-display: #8a05ff;
   --accent-strong: #48008c;
   --success: #009e7a;
+  --bg-hover: rgba(0, 0, 0, 0.02);
   --btn-bg: #0d0d0d;
   --btn-text: #ffffff;
   --font-brand: 'Roobert', 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -51,6 +52,7 @@
     --accent-display: #c29eff;
     --accent-strong: #c29eff;
     --success: #00db7c;
+    --bg-hover: rgba(255, 255, 255, 0.03);
     --btn-bg: #ffffff;
     --btn-text: #0d0d0d;
   }
@@ -157,6 +159,7 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
   .log li, .reveal, .award, .headcount, .team { animation: none; }
+  .team-overlay { transition: none; }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none; }
@@ -375,6 +378,64 @@ h1 {
 }
 
 .team ul li.existing span:first-child { color: var(--accent-display); }
+
+.team-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: -16px;
+  padding: 16px;
+  color: inherit;
+  text-decoration: none;
+  height: calc(100% + 32px);
+}
+
+.team:has(.team-link):hover { background: var(--bg-hover); }
+
+.team { position: relative; }
+
+.team-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+  transition: opacity 350ms var(--ease);
+}
+
+.team-overlay .spinner {
+  font-size: 24px;
+  width: auto;
+  color: var(--accent-display);
+}
+
+.team-overlay.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.team-ready {
+  margin-top: auto;
+  padding-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--success);
+}
 
 .team-org {
   color: var(--text-faint);

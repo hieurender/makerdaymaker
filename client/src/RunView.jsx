@@ -4,16 +4,18 @@ import Spinner from './Spinner.jsx';
 
 const VISIBLE_LOGS = 12;
 
-const initial = { step: null, logs: [], results: {}, interim: null, startedAt: null };
+const initial = { step: null, logs: [], results: {}, interim: null, statuses: {}, startedAt: null };
 
 function reduce(state, event) {
   switch (event.type) {
     case 'step': {
       const { [event.key]: _, ...results } = state.results;
-      return { ...state, step: event, logs: [], results, interim: null, startedAt: event.at };
+      return { ...state, step: event, logs: [], results, interim: null, statuses: {}, startedAt: event.at };
     }
     case 'interim':
       return { ...state, logs: [], interim: event };
+    case 'team-status':
+      return { ...state, statuses: { ...state.statuses, [event.slug]: event.status } };
     case 'log':
       return { ...state, logs: [...state.logs, event], interim: null };
     case 'result':
@@ -27,24 +29,28 @@ function elapsed(from, to) {
   return `+${((to - from) / 1000).toFixed(1)}s`;
 }
 
-function withTransition(update) {
-  if (!document.startViewTransition) return update();
-  document.startViewTransition(() => flushSync(update));
-}
-
 export default function RunView({ runId }) {
   const [state, dispatch] = useReducer(reduce, initial);
   const [pending, setPending] = useState(false);
   const indexRef = useRef(-1);
+  const heldRef = useRef(null);
 
   useEffect(() => {
     const source = new EventSource(`/api/runs/${runId}/events`);
     source.onmessage = (e) => {
       const event = JSON.parse(e.data);
+      if (heldRef.current) return heldRef.current.push(event);
       const advancing = event.type === 'step' && indexRef.current >= 0 && event.index > indexRef.current;
       if (event.type === 'step') indexRef.current = event.index;
-      if (advancing) withTransition(() => dispatch(event));
-      else dispatch(event);
+      if (!advancing || !document.startViewTransition) return dispatch(event);
+      heldRef.current = [];
+      document.startViewTransition(() =>
+        flushSync(() => {
+          dispatch(event);
+          heldRef.current.forEach(dispatch);
+          heldRef.current = null;
+        }),
+      );
     };
     return () => source.close();
   }, [runId]);
@@ -55,7 +61,7 @@ export default function RunView({ runId }) {
     setPending(false);
   }
 
-  const { step, logs, results, interim, startedAt } = state;
+  const { step, logs, results, interim, statuses, startedAt } = state;
   if (!step) return null;
   const result = results[step.key];
   const pinnedTheme = step.key !== 'theme' && results.theme;
@@ -96,7 +102,7 @@ export default function RunView({ runId }) {
       )}
 
       <div className="stage">
-        {result ? <Reveal view={step.key} data={result} /> : interim ? <Reveal view={interim.view} data={interim.data} /> : (
+        {result ? <Reveal view={step.key} data={result} /> : interim ? <Reveal view={interim.view} data={interim.data} statuses={statuses} /> : (
           <div className="working">
             <Spinner />
             <ul className="log">
@@ -125,31 +131,55 @@ function awardLabel(award, i) {
   return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
 }
 
-function Reveal({ view, data }) {
+function Reveal({ view, data, statuses }) {
   if (view === 'theme') return <ThemeReveal theme={data} />;
   if (view === 'awards') return <AwardsReveal awards={data} />;
   if (view === 'headcount') return <HeadcountReveal roster={data} />;
   if (view === 'teams') return <TeamsReveal teams={data.teams} />;
+  if (view === 'projects') return <TeamsReveal teams={data.teams} statuses={statuses ?? {}} allReady={!statuses} />;
   return null;
 }
 
-function TeamsReveal({ teams }) {
+function TeamsReveal({ teams, statuses, allReady }) {
+  const tracking = Boolean(statuses);
   return (
     <ol className="teams">
-      {teams.map((team, i) => (
-        <li key={team.name} className="team" style={{ animationDelay: `${Math.min(i * 30, 900)}ms` }}>
-          <h3 className="team-name">{team.name}</h3>
-          <ul>
-            {team.members.map((m) => (
-              <li key={m.id} className={m.fake ? undefined : 'existing'}>
-                <span>{m.name}</span>
-                <span className="team-org">{m.org ?? '—'}</span>
-              </li>
-            ))}
-          </ul>
-        </li>
-      ))}
+      {teams.map((team, i) => {
+        const status = allReady ? 'ready' : statuses?.[team.slug];
+        const body = (
+          <>
+            <h3 className="team-name">{team.name}</h3>
+            <ul>
+              {team.members.map((m) => (
+                <li key={m.id} className={m.fake ? undefined : 'existing'}>
+                  <span>{m.name}</span>
+                  <span className="team-org">{m.org ?? '—'}</span>
+                </li>
+              ))}
+            </ul>
+            {status === 'ready' && <span className="team-ready">Ready ↗</span>}
+          </>
+        );
+        return (
+          <li key={team.name} className="team" style={{ animationDelay: `${Math.min(i * 30, 900)}ms` }}>
+            {status === 'ready' ? (
+              <a className="team-link" href={`/${team.slug}`} target="_blank" rel="noopener noreferrer">{body}</a>
+            ) : body}
+            {tracking && <TeamStatus status={status} />}
+          </li>
+        );
+      })}
     </ol>
+  );
+}
+
+function TeamStatus({ status }) {
+  const done = status === 'ready';
+  return (
+    <div className={done ? 'team-overlay done' : 'team-overlay'} aria-hidden={done}>
+      {!done && <Spinner />}
+      <span>{done ? status : status ?? 'waiting'}</span>
+    </div>
   );
 }
 

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOCATION, YEAR } from './config.js';
 import { approve, createRun, getRun, retry } from './runs.js';
+import { getPage } from './steps/projects.js';
 
 const port = process.env.PORT || 3000;
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
@@ -43,6 +44,12 @@ app.get('/api/runs/:id/events', (req, res) => {
 });
 
 app.use(express.static(distDir));
+
+app.get('/:slug', (req, res, next) => {
+  const page = getPage(req.params.slug);
+  if (!page) return next();
+  res.type('html').send(page);
+});
 app.get('/{*splat}', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 
 app.listen(port, () => console.log(`makerdaymaker listening on :${port}`));

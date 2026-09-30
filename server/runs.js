@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
 import { generateAwards } from './steps/awards.js';
+import { buildProjects } from './steps/projects.js';
 import { formTeams } from './steps/teams.js';
 import { generateTheme } from './steps/theme.js';
 
@@ -8,7 +9,7 @@ export const STEPS = [
   { key: 'theme', name: 'Generating a theme', run: generateTheme },
   { key: 'awards', name: 'Generating awards', run: generateAwards },
   { key: 'teams', name: 'Forming teams', run: formTeams },
-  { key: 'projects', name: 'Building projects' },
+  { key: 'projects', name: 'Building projects', run: buildProjects },
   { key: 'voting', name: 'Voting' },
   { key: 'winners', name: 'Announcing winners' },
 ];
@@ -59,7 +60,8 @@ async function execute(run) {
     return;
   }
   const show = (view, data) => emit(run, { type: 'interim', view, data });
-  const data = await step.run(log, run.results, show);
+  const send = (event) => emit(run, event);
+  const data = await step.run(log, run.results, show, send);
   run.results[step.key] = data;
   run.busy = false;
   emit(run, { type: 'result', key: step.key, data });
