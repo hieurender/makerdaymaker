@@ -1,13 +1,11 @@
 import express from 'express';
-import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRun, getRun } from './runs.js';
 
 const port = process.env.PORT || 3000;
 const location = process.env.MAKER_DAY_LOCATION || 'San Francisco';
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
-
-const runs = new Map();
 
 const app = express();
 app.use(express.json());
@@ -17,15 +15,22 @@ app.get('/api/config', (_req, res) => {
 });
 
 app.post('/api/make', (_req, res) => {
-  const run = { id: randomUUID(), phase: 'theme', startedAt: new Date().toISOString() };
-  runs.set(run.id, run);
-  res.status(202).json(run);
+  const run = createRun();
+  res.status(202).json({ id: run.id });
 });
 
-app.get('/api/runs/:id', (req, res) => {
-  const run = runs.get(req.params.id);
+app.get('/api/runs/:id/events', (req, res) => {
+  const run = getRun(req.params.id);
   if (!run) return res.status(404).json({ error: 'not found' });
-  res.json(run);
+
+  res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
+  res.flushHeaders();
+
+  const send = (event) => res.write(`id: ${event.id}\ndata: ${JSON.stringify(event)}\n\n`);
+  const lastId = Number(req.get('Last-Event-ID') ?? -1);
+  run.events.slice(lastId + 1).forEach(send);
+  run.emitter.on('event', send);
+  req.on('close', () => run.emitter.off('event', send));
 });
 
 app.use(express.static(distDir));
