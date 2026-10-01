@@ -9,11 +9,16 @@ const LINES = [
   'Checking for trademark conflicts',
 ];
 
+let lastTheme;
+
 export async function generateTheme(log) {
   const total = between(3000, 5000);
   for (const line of LINES) {
     log(line);
     await sleep(total / LINES.length);
   }
-  return THEMES[Math.floor(Math.random() * THEMES.length)];
+  const options = THEMES.filter((t) => t.name !== lastTheme);
+  const theme = options[Math.floor(Math.random() * options.length)];
+  lastTheme = theme.name;
+  return theme;
 }

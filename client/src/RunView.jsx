@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import AwardIcon from './AwardIcon.jsx';
 import Spinner from './Spinner.jsx';
 import WinnersShow, { Finale } from './WinnersShow.jsx';
 
@@ -58,7 +59,7 @@ function elapsed(from, to) {
   return `+${((to - from) / 1000).toFixed(1)}s`;
 }
 
-export default function RunView({ runId }) {
+export default function RunView({ runId, year }) {
   const [state, dispatch] = useReducer(reduce, initial);
   const [pending, setPending] = useState(false);
   const indexRef = useRef(-1);
@@ -103,6 +104,7 @@ export default function RunView({ runId }) {
         <div className="stepbar-label">
           <span className="step-count">Step {step.index + 1}/{step.total}</span>
           <h2>{step.name}</h2>
+          <span className="step-year">Maker Day {year}</span>
         </div>
         <ol className="stepbar-segments" aria-hidden="true">
           {Array.from({ length: step.total }, (_, i) => (
@@ -272,7 +274,7 @@ function AwardsReveal({ awards }) {
       {awards.map((award, i) => (
         <li key={award.name} className="award" style={{ animationDelay: `${i * 120}ms` }}>
           <span className="overline">{awardLabel(award, i)}</span>
-          {award.icon && <img className="award-icon" src={award.icon} alt="" width="48" height="48" />}
+          <AwardIcon award={award} className="award-icon" size={48} />
           <h3>{award.name}</h3>
           <p>{award.description}</p>
         </li>
