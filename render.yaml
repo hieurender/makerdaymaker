@@ -15,6 +15,8 @@ projects:
             envVars:
               - key: MAKER_DAY_LOCATION
                 value: San Francisco
+              - key: MAKER_DAY_YEAR
+                value: "2027"
               - key: WORKFLOW_SLUG
                 fromService:
                   type: workflow
