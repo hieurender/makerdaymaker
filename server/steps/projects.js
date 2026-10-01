@@ -2,6 +2,9 @@ import { shuffle } from './util.js';
 import { runProjects } from '../workflowClient.js';
 import { DEMOS, DOMAINS, LOOKS } from '../../workflow/styles.js';
 
+const FAILURE_CHANCE = 0.05;
+const FAILED = 'failed spectacularly';
+
 const FEATURES = [
   ['One-click everything', 'Press the button. Things happen. You go home early.'],
   ['Zero config', 'Sensible defaults, so you never open a YAML file again.'],
@@ -120,8 +123,14 @@ export async function buildProjects(log, { theme, awards, teams: roster }, show,
   const results = await runProjects({ theme, awards, teams: brief, onStatus: status, log }).finally(() => clearInterval(heartbeat));
 
   const bySlug = new Map(results.map((r) => [r.slug, r]));
+  const failed = new Set();
   for (const team of teams) {
     const result = bySlug.get(team.slug);
+    if (Math.random() < FAILURE_CHANCE) {
+      failed.add(team.slug);
+      status(team.slug, FAILED, result?.pitch);
+      continue;
+    }
     if (result?.html) {
       pages.set(team.slug, result.html);
       console.log(`[workflow] ${team.slug}: review ${result.review}${result.problems?.length ? ` - ${result.problems.join('; ')}` : ''}`);
@@ -133,5 +142,5 @@ export async function buildProjects(log, { theme, awards, teams: roster }, show,
     status(team.slug, 'ready', result?.pitch);
   }
   console.log(`[workflow] finished: ${teams.length} teams, ${results.filter((r) => r.html).length} built by AI`);
-  return { teams };
+  return { teams: teams.map((team) => ({ ...team, failed: failed.has(team.slug) })) };
 }

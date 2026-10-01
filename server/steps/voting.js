@@ -22,8 +22,8 @@ function weightedPick(items, weight) {
 }
 
 export async function runVoting(log, { awards, teams: roster, projects }, show, send) {
-  const teams = projects.teams;
-  const teamOf = new Map(teams.flatMap((team) => team.members.map((m) => [m.id, team.name])));
+  const teams = projects.teams.filter((t) => !t.failed);
+  const teamOf = new Map(projects.teams.flatMap((team) => team.members.map((m) => [m.id, team.name])));
   const shuffled = shuffle(roster.employees.map((voter) => ({ voter, team: teamOf.get(voter.id) })));
   const last = shuffled.find((b) => hasTenure(b.voter, LAST_VOTER_MIN_YEARS));
   const ballots = [...shuffled.filter((b) => b !== last), ...(last ? [last] : [])];

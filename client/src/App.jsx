@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Backdrop from './Backdrop.jsx';
 import Landing from './Landing.jsx';
 import RunView from './RunView.jsx';
 
@@ -31,6 +32,7 @@ export default function App() {
 
   return (
     <main className="shell">
+      <Backdrop location={config?.location} dim={Boolean(runId)} />
       <header className="masthead">
         <img className="logo logo-light" src="/render-logo-black-full.svg" alt="Render" />
         <img className="logo logo-dark" src="/render-logo-white-full.svg" alt="Render" />

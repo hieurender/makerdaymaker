@@ -35,6 +35,7 @@
   --success: #009e7a;
   --bg-hover: rgba(0, 0, 0, 0.02);
   --flash: #e7dbff;
+  --error: #e23642;
   --btn-bg: #0d0d0d;
   --btn-text: #ffffff;
   --font-brand: 'Roobert', 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -55,6 +56,7 @@
     --success: #00db7c;
     --bg-hover: rgba(255, 255, 255, 0.03);
     --flash: #48008c;
+    --error: #f0989e;
     --btn-bg: #ffffff;
     --btn-text: #0d0d0d;
   }
@@ -138,8 +140,11 @@ h1 {
   content: '';
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background-color: color-mix(in srgb, var(--bg) 60%, transparent);
+  transition: background-color 800ms var(--ease);
 }
+
+.backdrop.dim::after { background-color: color-mix(in srgb, var(--bg) 95%, transparent); }
 
 @keyframes backdrop-in {
   from { opacity: 0; }
@@ -196,6 +201,7 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
   .log li, .reveal, .award, .headcount, .team, .backdrop { animation: none; }
+  .backdrop::after { transition: none; }
   .team-overlay { transition: none; }
   .stepbar-segments li.current { animation: none; }
   .voter-flash, .ballot-team.flash, .winners > *, .suspense { animation: none; }
@@ -435,6 +441,8 @@ h1 {
   width: auto;
   color: var(--accent-display);
 }
+
+.team-overlay.failed { color: var(--error); }
 
 .team-overlay.done {
   opacity: 0;
@@ -830,7 +838,7 @@ h2 {
 .stepbar-segments li { height: 4px; background: var(--border); }
 .stepbar-segments li.done { background: var(--success); }
 .stepbar-segments li.current {
-  background: var(--accent);
+  background: var(--text);
   animation: step-pulse 1600ms ease-in-out infinite;
 }
 

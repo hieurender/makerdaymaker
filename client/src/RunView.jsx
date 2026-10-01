@@ -4,6 +4,7 @@ import Spinner from './Spinner.jsx';
 import WinnersShow, { Finale } from './WinnersShow.jsx';
 
 const VISIBLE_LOGS = 12;
+const FAILED = 'failed spectacularly';
 
 const noVotes = { cast: 0, last: null };
 
@@ -172,7 +173,7 @@ function TeamsReveal({ teams, statuses, pitches = {}, allReady }) {
   return (
     <ol className="teams">
       {teams.map((team, i) => {
-        const status = allReady ? 'ready' : statuses?.[team.slug];
+        const status = allReady ? (team.failed ? FAILED : 'ready') : statuses?.[team.slug];
         const pitch = pitches[team.slug];
         const body = (
           <>
@@ -248,9 +249,10 @@ function VotingBoard({ total, awards, voting }) {
 
 function TeamStatus({ status, pitch }) {
   const done = status === 'ready';
+  const failed = status === FAILED;
   return (
-    <div className={done ? 'team-overlay done' : 'team-overlay'} aria-hidden={done}>
-      {!done && <Spinner />}
+    <div className={done ? 'team-overlay done' : failed ? 'team-overlay failed' : 'team-overlay'} aria-hidden={done}>
+      {!done && !failed && <Spinner />}
       <span>{done ? status : status ?? 'waiting'}</span>
       {!done && pitch && <Pitch pitch={pitch} />}
     </div>
