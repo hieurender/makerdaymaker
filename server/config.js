@@ -8,8 +8,26 @@ function yearFromEnv(value) {
 export const YEAR = yearFromEnv(process.env.MAKER_DAY_YEAR);
 export const LOCATION = process.env.MAKER_DAY_LOCATION || 'San Francisco';
 
-const PROJECTED_HEADCOUNT = { 2027: 220, 2028: 450 };
-const GROWTH_AFTER_PROJECTIONS = 1.8;
+export const PROJECTED_HEADCOUNT = {
+  2027: 220,
+  2028: 740,
+  2029: 1010,
+  2030: 1500,
+  2031: 2050,
+  2032: 2700,
+  2033: 3450,
+  2034: 4300,
+  2035: 5250,
+  2036: 6250,
+  2037: 7300,
+  2038: 8400,
+  2039: 9550,
+  2040: 10750,
+  2041: 12000,
+  2042: 13300,
+};
+const GROWTH_AFTER_PROJECTIONS = 1.1;
+const MAX_HEADCOUNT = 50000;
 
 const EXOTIC_LOCATIONS = [
   'Bali',
@@ -46,7 +64,7 @@ export function parseConfig(input = {}) {
   return {
     year: year >= 2000 && year <= 3000 ? year : DEFAULT_CONFIG.year,
     location: location || DEFAULT_CONFIG.location,
-    headcount: headcount > 0 && headcount <= 5000 ? headcount : DEFAULT_CONFIG.headcount,
+    headcount: headcount > 0 && headcount <= MAX_HEADCOUNT ? headcount : DEFAULT_CONFIG.headcount,
   };
 }
 

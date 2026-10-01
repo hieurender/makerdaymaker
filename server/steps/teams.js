@@ -1,3 +1,4 @@
+import { headcountFor } from '../config.js';
 import EMPLOYEES from '../data/employees.json' with { type: 'json' };
 import { FIRST_NAMES, LAST_NAMES, TITLES } from '../data/names.js';
 import { TEAM_NAMES } from '../data/themes.js';
@@ -7,8 +8,32 @@ const TEAM_SIZE = 5;
 const MAX_TEAMS = 25;
 const REQUIRED_TENURE_YEARS = 3;
 const HEADCOUNT_PAUSE_MS = 5000;
+const FRONTFILL_MS = 6000;
+const FIRST_COHORT_YEAR = 2027;
+const FIRST_COHORT_START = Date.UTC(2026, 9, 1);
+const INITIALS = 'ABCDEFGHIJKLMNOPRSTVW';
 
-const pick = (items) => items[Math.floor(Math.random() * items.length)];
+function seeded(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const pick = (items, rng = Math.random) => items[Math.floor(rng() * items.length)];
+
+function seededShuffle(items, rng) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
 const shortOrg = (org) => org?.replace(/ Organization$/, '') ?? null;
 
 function allocate(total, weights) {
@@ -20,21 +45,37 @@ function allocate(total, weights) {
   return shares;
 }
 
-function futureStartDate(year) {
-  const now = Date.now();
+function cohortStartDate(year, rng) {
+  const start = year === FIRST_COHORT_YEAR ? FIRST_COHORT_START : Date.UTC(year - 1, 6, 1);
   const end = Date.UTC(year, 5, 30);
-  return new Date(between(now, end)).toISOString().slice(0, 10);
+  return new Date(start + rng() * (end - start)).toISOString().slice(0, 10);
 }
 
-function fakeNames(count, taken) {
-  const names = [];
-  while (names.length < count) {
-    const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+function fakeName(taken, rng) {
+  for (let attempt = 0; ; attempt++) {
+    const first = pick(FIRST_NAMES, rng);
+    const last = pick(LAST_NAMES, rng);
+    const name = attempt < 20 ? `${first} ${last}` : `${first} ${pick([...INITIALS], rng)}. ${last}`;
     if (taken.has(name)) continue;
     taken.add(name);
-    names.push(name);
+    return name;
   }
-  return names;
+}
+
+function hireCohort(year, size, orgCounts, taken) {
+  const rng = seeded(year);
+  const orgs = seededShuffle(
+    allocate(size, orgCounts).flatMap(({ org, n }) => Array.from({ length: n }, () => org)),
+    rng,
+  );
+  return orgs.map((org, i) => ({
+    id: `F${year}-${String(i + 1).padStart(5, '0')}`,
+    name: fakeName(taken, rng),
+    title: pick(TITLES[org] ?? ['Generalist'], rng),
+    org,
+    startDate: cohortStartDate(year, rng),
+    fake: true,
+  }));
 }
 
 function tenureBracket(startDate) {
@@ -83,7 +124,16 @@ function assignTeams(employees, theme) {
 }
 
 export async function formTeams(log, { theme }, show, _send, { year, headcount: target }) {
-  const current = EMPLOYEES.map((e) => ({ ...e, org: shortOrg(e.org), fake: false }));
+  const real = EMPLOYEES.map((e) => ({ ...e, org: shortOrg(e.org), fake: false }));
+  const orgCounts = Object.entries(
+    real.filter((e) => e.org).reduce((acc, e) => ({ ...acc, [e.org]: (acc[e.org] ?? 0) + 1 }), {}),
+  ).map(([org, count]) => ({ org, count }));
+  const taken = new Set(real.map((e) => e.name));
+  const current = [...real];
+  for (let y = FIRST_COHORT_YEAR; y < year; y++) {
+    current.push(...hireCohort(y, Math.max(0, headcountFor(y) - current.length), orgCounts, taken));
+  }
+  const fakes = hireCohort(year, Math.max(0, target - current.length), orgCounts, taken);
 
   log(`Extrapolating number of employees by ${year}`);
   await sleep(between(900, 1300));
@@ -92,28 +142,18 @@ export async function formTeams(log, { theme }, show, _send, { year, headcount: 
   log(`Projected headcount: ${target}`);
   await sleep(between(600, 900));
 
-  const orgCounts = Object.entries(
-    current.filter((e) => e.org).reduce((acc, e) => ({ ...acc, [e.org]: (acc[e.org] ?? 0) + 1 }), {}),
-  ).map(([org, count]) => ({ org, count }));
-  const allocation = allocate(Math.max(0, target - current.length), orgCounts);
-
-  const taken = new Set(current.map((e) => e.name));
-  const hires = shuffle(allocation.flatMap(({ org, n }) => Array.from({ length: n }, () => org)));
-  const names = fakeNames(hires.length, taken);
-
   log('Frontfilling employees');
   await sleep(between(500, 800));
-  const fakes = [];
-  for (const [i, org] of hires.entries()) {
-    const employee = { id: `F${String(i + 1).padStart(4, '0')}`, name: names[i], title: pick(TITLES[org] ?? ['Generalist']), org, startDate: futureStartDate(year), fake: true };
-    fakes.push(employee);
-    log(`${employee.name} - ${org}`);
-    await sleep(between(60, 140));
+  const perHire = FRONTFILL_MS / Math.max(1, fakes.length);
+  for (const employee of fakes) {
+    log(`${employee.name} - ${employee.org}`);
+    await sleep(perHire);
   }
 
   const employees = [...current, ...fakes];
+  const countBy = (list, org) => list.filter((e) => e.org === org).length;
   const orgs = orgCounts
-    .map(({ org, count }) => ({ org, current: count, added: allocation.find((a) => a.org === org).n }))
+    .map(({ org }) => ({ org, current: countBy(current, org), added: countBy(fakes, org) }))
     .sort((a, b) => b.current + b.added - (a.current + a.added));
   show('headcount', { headcount: employees.length, orgs });
   await sleep(HEADCOUNT_PAUSE_MS);

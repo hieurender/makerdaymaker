@@ -44,7 +44,7 @@ function reduce(state, event) {
       };
     case 'log':
       const keepGrid = state.interim?.view === 'projects';
-      return { ...state, logs: [...state.logs, event], interim: keepGrid ? state.interim : null };
+      return { ...state, logs: [...state.logs.slice(1 - VISIBLE_LOGS), event], interim: keepGrid ? state.interim : null };
     case 'error':
       return { ...state, error: event.message };
     case 'result':
