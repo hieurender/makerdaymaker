@@ -1,6 +1,6 @@
 import EMPLOYEES from '../data/employees.json' with { type: 'json' };
 import { FIRST_NAMES, LAST_NAMES, TITLES } from '../data/names.js';
-import { TEAM_NAMES } from '../data/teamNames.js';
+import { TEAM_NAMES } from '../data/themes.js';
 import { between, hasTenure, shuffle, sleep } from './util.js';
 
 const TEAM_SIZE = 5;

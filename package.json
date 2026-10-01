@@ -10,7 +10,8 @@
     "build": "vite build",
     "start": "node --env-file-if-exists=.env server/index.js",
     "workflow": "node workflow/index.js",
-    "dump:slack": "node scripts/dump-slack-directory.js"
+    "dump:slack": "node scripts/dump-slack-directory.js",
+    "banners": "node scripts/generate-banners.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
+    "canvas-confetti": "^1.9.4",
     "concurrently": "^9.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

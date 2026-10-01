@@ -1,12 +1,20 @@
+import confetti from 'canvas-confetti';
 import { useCallback, useEffect, useState } from 'react';
 
 const SUSPENSE_SECONDS = 5;
-const START_KEYS = new Set(['ArrowRight', 'PageDown', 'Enter', ' ']);
+const CONFETTI_COLORS = ['#8a05ff', '#c29eff', '#e7dbff', '#00db7c', '#ffffff'];
+
+function celebrate() {
+  const shared = { particleCount: 140, spread: 75, startVelocity: 60, colors: CONFETTI_COLORS, disableForReducedMotion: true };
+  confetti({ ...shared, angle: 60, origin: { x: 0, y: 0.8 } });
+  confetti({ ...shared, angle: 120, origin: { x: 1, y: 0.8 } });
+  setTimeout(() => confetti({ ...shared, particleCount: 200, spread: 120, origin: { x: 0.5, y: 0.4 } }), 250);
+}
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 export default function WinnersShow({ reveals, onFinalSlide }) {
-  const [phase, setPhase] = useState('intro');
+  const [phase, setPhase] = useState('suspense');
   const [countdown, setCountdown] = useState(SUSPENSE_SECONDS);
   const [slide, setSlide] = useState(0);
   const [direction, setDirection] = useState('next');
@@ -27,41 +35,23 @@ export default function WinnersShow({ reveals, onFinalSlide }) {
 
   useEffect(() => {
     if (phase !== 'suspense') return;
-    if (countdown === 0) return setPhase('carousel');
+    if (countdown === 0) {
+      celebrate();
+      return setPhase('carousel');
+    }
     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [phase, countdown]);
 
   useEffect(() => {
-    const onClick = (e) => {
-      if (phase === 'intro' && !e.target.closest('a, button')) setPhase('suspense');
-    };
     const onKey = (e) => {
-      if (phase === 'intro' && START_KEYS.has(e.key)) {
-        e.preventDefault();
-        setPhase('suspense');
-      } else if (phase === 'carousel' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-        e.preventDefault();
-        go(e.key === 'ArrowRight' ? 1 : -1);
-      }
+      if (phase !== 'carousel' || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+      e.preventDefault();
+      go(e.key === 'ArrowRight' ? 1 : -1);
     };
-    document.addEventListener('click', onClick);
     document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('click', onClick);
-      document.removeEventListener('keydown', onKey);
-    };
+    return () => document.removeEventListener('keydown', onKey);
   }, [phase, go]);
-
-  if (phase === 'intro') {
-    return (
-      <div className="winners intro" key="intro">
-        <span className="overline">{plural(reveals.length, 'award')}</span>
-        <h1 className="winners-title">The envelopes, please</h1>
-        <span className="overline hint">Click anywhere to begin</span>
-      </div>
-    );
-  }
 
   if (phase === 'suspense') {
     return (

@@ -1,10 +1,17 @@
+import source from '../../builder_day_awards.json' with { type: 'json' };
 import { AWARDS } from '../data/awards.js';
 import { between, shuffle, sleep } from './util.js';
 
-const COUNT = 6;
+const FROM_FILE = 2;
+const THEMED = 4;
+const COUNT = FROM_FILE + THEMED;
+
+const FILE_AWARDS = source.awards.map((a) => ({
+  name: a.name,
+  description: a.criteria_prompt.split(/(?<=\.)\s/)[0],
+}));
 
 export async function generateAwards(log, { theme }) {
-  const pool = AWARDS[theme.name];
   log(`Loading theme context: ${theme.name}`);
   await sleep(between(700, 1100));
   log('Brainstorming award concepts');
@@ -15,6 +22,7 @@ export async function generateAwards(log, { theme }) {
     log(`Engraving trophy ${i}/${COUNT}`);
     await sleep(between(150, 300));
   }
-  const [grand, ...rest] = pool;
-  return [grand, ...shuffle(rest).slice(0, COUNT - 1)];
+  const [grand, ...classics] = shuffle(FILE_AWARDS).slice(0, FROM_FILE);
+  const themed = shuffle(AWARDS[theme.name]).slice(0, THEMED);
+  return [{ ...grand, grand: true }, ...classics, ...themed];
 }

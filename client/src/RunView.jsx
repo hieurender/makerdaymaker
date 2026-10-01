@@ -113,6 +113,7 @@ export default function RunView({ runId }) {
 
       {pinnedTheme && (
         <div className="pinned">
+          {pinnedTheme.banner && <ThemeBanner src={pinnedTheme.banner} alt={pinnedTheme.name} />}
           <div className="theme-block">
             <span className="overline">Theme</span>
             <p className="theme-name">{pinnedTheme.name}</p>
@@ -146,7 +147,7 @@ export default function RunView({ runId }) {
       {(error || (result && step.index < step.total - 1)) && (
         <div className="actions">
           <button className="btn btn-secondary" onClick={() => act('retry')} disabled={pending}>Retry</button>
-          {result && <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Approve</button>}
+          {result && <button className="btn btn-primary" onClick={() => act('approve')} disabled={pending}>Next</button>}
         </div>
       )}
     </section>
@@ -155,6 +156,12 @@ export default function RunView({ runId }) {
 
 function awardLabel(award, i) {
   return award.grand ? 'Grand prize' : String(i + 1).padStart(2, '0');
+}
+
+function ThemeBanner({ src, alt }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <img className="theme-banner" src={src} alt={alt} onError={() => setFailed(true)} />;
 }
 
 function Reveal({ view, data, statuses, pitches, voting, onFinalSlide }) {

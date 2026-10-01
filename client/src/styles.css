@@ -200,7 +200,7 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .make-fill { transition: none; }
-  .log li, .reveal, .award, .headcount, .team, .backdrop { animation: none; }
+  .log li, .reveal, .award, .headcount, .team, .backdrop, .theme-banner { animation: none; }
   .backdrop::after { transition: none; }
   .team-overlay { transition: none; }
   .stepbar-segments li.current { animation: none; }
@@ -227,6 +227,14 @@ h1 {
 
 
 .pinned .theme-block { gap: 4px; }
+
+.theme-banner {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1920 / 324;
+  object-fit: cover;
+  animation: enter 600ms var(--ease) both;
+}
 
 .pinned .theme-name {
   font-family: var(--font-brand);
@@ -560,7 +568,6 @@ h1 {
 }
 
 .stage:has(.winners) { justify-content: center; }
-.stage:has(.winners.intro) { cursor: pointer; user-select: none; }
 
 .carousel {
   width: 100%;
@@ -623,7 +630,6 @@ h1 {
 .winners > :nth-child(6) { animation-delay: 1100ms; }
 .winners > :nth-child(7) { animation-delay: 1600ms; }
 
-.winners-title { max-width: none; }
 
 .winners-award {
   font-size: 56px;

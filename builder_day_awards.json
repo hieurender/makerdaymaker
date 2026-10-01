@@ -1,0 +1,69 @@
+{
+  "award_count": 10,
+  "thumbnail_spec": {
+    "width_px": 96,
+    "height_px": 96
+  },
+  "awards": [
+    {
+      "id": 1,
+      "name": "Most Ambitious",
+      "criteria_prompt": "Awarded to the team that attempted the hardest, boldest build of the day. Judge the size of the swing, not the polish of the result: technical difficulty, scope, and how far the team pushed past what seemed doable in one day. A partially working moonshot beats a flawless small idea.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a rocket blasting straight up toward a star, with a tall flame trail."
+    },
+    {
+      "id": 2,
+      "name": "Best Integration",
+      "criteria_prompt": "Awarded to the app that connects to real tools in the most useful way. Look for meaningful hookups to existing services (MCP connectors, APIs, webhooks, Slack, calendars, databases) that make the app more powerful than it could be alone. Reward integrations that actually work in the demo and solve a real workflow.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: two interlocking puzzle pieces snapping together, with a small spark where they join."
+    },
+    {
+      "id": 3,
+      "name": "Most Likely to Ship Monday",
+      "criteria_prompt": "Awarded to the project closest to production-ready. Judge reliability, a clean deploy on Render, sensible structure, and a clear user who would adopt it right away. The winner should feel like it could go live next week with little more than a code review.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a shipping crate with a green checkmark stamped on the side and a small calendar page beside it."
+    },
+    {
+      "id": 4,
+      "name": "Rube Goldberg Award",
+      "criteria_prompt": "Awarded to the most delightfully overengineered solution. Look for a simple task accomplished through an absurdly elaborate chain of services, agents, and steps. Bonus points if every link in the chain actually works and the team can explain the whole contraption with a straight face.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a tiny chain-reaction machine: a rolling ball, a row of falling dominoes, gears, and a lever tipping a bucket."
+    },
+    {
+      "id": 5,
+      "name": "Most Fun",
+      "criteria_prompt": "Awarded to the project people most enjoyed using or watching. Judge the delight factor: laughter at the demo table, people coming back for another turn, and the team's own energy. The winner is the app you'd show a friend just because it's fun.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a party popper bursting with confetti and streamers."
+    },
+    {
+      "id": 6,
+      "name": "Best Team Name",
+      "criteria_prompt": "Awarded to the team whose experiment title lands best. Judge wit, puns, commitment to the theme, and how memorable it is. The winning name should get a groan, a laugh, or both, and still be what everyone calls the project afterward.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a name tag sticker with a blank center, surrounded by small sparkles."
+    },
+    {
+      "id": 7,
+      "name": "Most Creative Concept",
+      "criteria_prompt": "Awarded to the most original idea in the room. Judge novelty of the problem or approach, a surprising angle, and a hook nobody else thought of. Execution matters less than the spark: the winner should make people say they never would have thought of that.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a glowing lightbulb with a paintbrush swirl of color spilling out of it."
+    },
+    {
+      "id": 8,
+      "name": "Most Absurd",
+      "criteria_prompt": "Awarded to the most gloriously pointless project, executed with total seriousness. Judge how ridiculous the premise is, how committed the team stays to it, and how well it actually works. The best entry solves a problem that should never have been solved.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a rubber duck wearing a tiny top hat and monocle."
+    },
+    {
+      "id": 9,
+      "name": "Most Likely to Get VC Funding",
+      "criteria_prompt": "Awarded to the project with the strongest startup pitch. Judge a clear market, a crisp one-line value proposition, a believable path to growth, and a demo that makes investors lean in. The winner should sound like a pitch deck waiting to happen.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a money bag with a dollar sign next to a chart line shooting upward."
+    },
+    {
+      "id": 10,
+      "name": "Best Use of AI",
+      "criteria_prompt": "Awarded to the app where AI is essential, not decorative. Judge how central AI is to the core experience, how cleverly models, agents, or tools are applied, and whether the result is something that couldn't exist without AI. Reward thoughtful design over simply adding a chatbot.",
+      "thumbnail_prompt": "96 x 96 px square icon, flat vector award-badge style, bold simple shapes, thick outlines, high contrast, centered on a transparent background, readable at small size, no text or letters. Subject: a friendly robot head with a glowing brain-shaped circuit pattern."
+    }
+  ]
+}
