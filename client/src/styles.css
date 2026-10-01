@@ -981,3 +981,18 @@ h2 {
 .team-pitch span { color: var(--text-faint); }
 
 .team-overlay .team-pitch { text-align: center; }
+
+.award-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 4px 0;
+  image-rendering: auto;
+}
+
+.winners-icon {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+}

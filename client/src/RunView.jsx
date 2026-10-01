@@ -272,6 +272,7 @@ function AwardsReveal({ awards }) {
       {awards.map((award, i) => (
         <li key={award.name} className="award" style={{ animationDelay: `${i * 120}ms` }}>
           <span className="overline">{awardLabel(award, i)}</span>
+          {award.icon && <img className="award-icon" src={award.icon} alt="" width="48" height="48" />}
           <h3>{award.name}</h3>
           <p>{award.description}</p>
         </li>

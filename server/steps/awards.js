@@ -6,8 +6,11 @@ const FROM_FILE = 2;
 const THEMED = 4;
 const COUNT = FROM_FILE + THEMED;
 
+const iconFor = (name) => `/award-icons/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`;
+
 const FILE_AWARDS = source.awards.map((a) => ({
   name: a.name,
+  icon: iconFor(a.name),
   description: a.criteria_prompt.split(/(?<=\.)\s/)[0],
 }));
 

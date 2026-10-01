@@ -68,6 +68,7 @@ export default function WinnersShow({ reveals, onFinalSlide }) {
       <button className="carousel-arrow" onClick={() => go(-1)} disabled={slide === 0} aria-label="Previous award">←</button>
       <div className={`winners ${direction}${award.grand ? ' grand' : ''}`} key={slide}>
         <span className="overline">{award.grand ? 'Grand prize' : `Award ${slide + 1} of ${reveals.length}`}</span>
+        {award.icon && <img className="winners-icon" src={award.icon} alt="" width="96" height="96" />}
         <h2 className="winners-award">{award.name}</h2>
         <h1 className="winners-team">
           <a href={`/${winner.slug}`} target="_blank" rel="noopener noreferrer">{winner.team}</a>
