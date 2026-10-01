@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Backdrop from './Backdrop.jsx';
 import Landing from './Landing.jsx';
 import RunView from './RunView.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -36,7 +37,10 @@ export default function App() {
       <header className="masthead">
         <img className="logo logo-light" src="/render-logo-black-full.svg" alt="Render" />
         <img className="logo logo-dark" src="/render-logo-white-full.svg" alt="Render" />
-        <span className="overline">Maker Day Maker</span>
+        <div className="masthead-end">
+          <span className="overline">Maker Day Maker</span>
+          <ThemeToggle />
+        </div>
       </header>
       {runId ? <RunView runId={runId} /> : <Landing config={config} onMake={make} />}
     </main>

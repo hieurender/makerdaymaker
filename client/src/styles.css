@@ -45,7 +45,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
     --bg: #0d0d0d;
     --border: #272727;
     --text: #ffffff;
@@ -61,6 +62,25 @@
     --btn-text: #0d0d0d;
   }
 }
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0d0d0d;
+  --border: #272727;
+  --text: #ffffff;
+  --text-secondary: #c7c7c7;
+  --text-faint: #b3b3b3;
+  --accent-display: #c29eff;
+  --accent-strong: #c29eff;
+  --success: #00db7c;
+  --bg-hover: rgba(255, 255, 255, 0.03);
+  --flash: #48008c;
+  --error: #f0989e;
+  --btn-bg: #ffffff;
+  --btn-text: #0d0d0d;
+}
+
+:root[data-theme='light'] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 
@@ -102,9 +122,11 @@ body {
 .logo { height: 24px; }
 .logo-dark { display: none; }
 @media (prefers-color-scheme: dark) {
-  .logo-light { display: none; }
-  .logo-dark { display: block; }
+  :root:not([data-theme='light']) .logo-light { display: none; }
+  :root:not([data-theme='light']) .logo-dark { display: block; }
 }
+:root[data-theme='dark'] .logo-light { display: none; }
+:root[data-theme='dark'] .logo-dark { display: block; }
 
 .hero {
   flex: 1;
@@ -230,9 +252,11 @@ h1 {
 
 .theme-banner {
   display: block;
-  width: 100%;
-  aspect-ratio: 1920 / 324;
-  object-fit: cover;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 45vh;
+  margin-inline: auto;
   animation: enter 600ms var(--ease) both;
 }
 
@@ -996,3 +1020,32 @@ h2 {
   height: 96px;
   margin: 0 auto;
 }
+
+.masthead-end {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.theme-toggle:hover { background: var(--bg-hover); }
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent-display);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg { width: 16px; height: 16px; }
