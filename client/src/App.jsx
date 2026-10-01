@@ -42,7 +42,7 @@ export default function App() {
           <ThemeToggle />
         </div>
       </header>
-      {runId ? <RunView runId={runId} /> : <Landing config={config} onMake={make} />}
+      {runId ? <RunView runId={runId} year={config.year} /> : <Landing config={config} onMake={make} />}
     </main>
   );
 }
